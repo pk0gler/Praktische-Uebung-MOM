@@ -33,6 +33,8 @@ public class ConnectionHandler implements MessageListener {
      */
     private String receiver = "";
 
+    public char os;
+
     public ConnectionHandler(String url) {
         System.out.println("\nComputer / User name:\t"+compName);
         ConnectionFactory factory = new ActiveMQConnectionFactory(compName, ActiveMQConnectionFactory.DEFAULT_PASSWORD,
@@ -48,7 +50,7 @@ public class ConnectionHandler implements MessageListener {
             consumer = session.createConsumer(destination);
             consumer.setMessageListener(this);
         } catch (JMSException e) {
-            System.out.println("Something went wrong while connecting the email server");
+            System.err.println("Something went wrong while connecting the email server");
             e.printStackTrace();
         }
     }
@@ -67,7 +69,7 @@ public class ConnectionHandler implements MessageListener {
             producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
             producer.send(message);
             producer.close();
-            System.out.println("Task successfully sent");
+            System.out.print("Sending to " + this.receiver + "\n");
         } catch (JMSException e) {
             System.out.println("Something went wrong while sending the task");
             e.printStackTrace();
@@ -117,12 +119,35 @@ public class ConnectionHandler implements MessageListener {
     @Override
     public void onMessage(Message message) {
         TextMessage textMessage = (TextMessage) message;
+        //System.out.println("drin");
         try {
-            System.out.println(textMessage.getStringProperty(TRANSMITTER_KEY) + "is invoking following command\n\t" + textMessage.getText());
-            char os = System.getProperty("os.name").charAt(0);
-            if (os == 'W') {
-
-            } else if (os == 'L') {
+            if (textMessage.getText().contains("\n"))
+            System.out.print("\nAwnswer from: " + textMessage.getStringProperty(TRANSMITTER_KEY) + "\n" + textMessage.getText());
+            if (textMessage.getText().equals("W")) this.os='W';
+            if (textMessage.getText().equals("L")) this.os='L';
+            if (this.os == 'W' && !textMessage.getText().equals("W") && !textMessage.getText().equals("L") && !textMessage.getText().contains("Output")) {
+                try
+                {
+                    Process p=Runtime.getRuntime().exec("cmd /c " + "dir C:\\Users");
+                    p.waitFor();
+                    BufferedReader reader=new BufferedReader(
+                            new InputStreamReader(p.getInputStream())
+                    );
+                    String line;
+                    String output = "Output:\n\t";
+                    while((line = reader.readLine()) != null)
+                    {
+                        output += line + "\n\t";
+                    }
+                    String recTemp = this.receiver;
+                    this.receiver = textMessage.getStringProperty(TRANSMITTER_KEY);
+                    sendTak(output);
+                    //System.out.println(output);
+                    this.receiver = recTemp;
+                }
+                catch(IOException e1) {}
+                catch(InterruptedException e2) {}
+            } else if (this.os == 'L' && !textMessage.getText().equals("W") && !textMessage.getText().equals("L") && !textMessage.getText().contains("Output")) {
                 try {
                     Process proc = Runtime.getRuntime().exec(new String[]{"bash","-c",textMessage.getText()});
                     BufferedReader stdInput = new BufferedReader(new
@@ -152,6 +177,7 @@ public class ConnectionHandler implements MessageListener {
                     this.receiver = textMessage.getStringProperty(TRANSMITTER_KEY);
                     sendTak(output);
                     this.receiver = recTemp;
+                    //System.out.println(output);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

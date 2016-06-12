@@ -88,7 +88,7 @@ public class CLIApplication {
 
         boolean inCommunication = false;
         char os = ' ';
-        String macAddr = "";
+        String ipAddr = "";
 
         Scanner scanner = new Scanner(System.in);
         String input;
@@ -108,26 +108,31 @@ public class CLIApplication {
             } else if (input.matches("/status")) {
                 System.out.println(this.status);
             } else if (input.matches("/connect (\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}) Windows")) {
-                macAddr = input.substring(8, input.lastIndexOf(" "));
+                ipAddr = input.substring(8, input.lastIndexOf(" "));
                 this.status = "Connecting to Windows Clinet\n" +
-                        "Mac Address:\t" + macAddr;
+                        "IP Address:\t" + ipAddr;
                 System.out.println(this.status);
-                connectionHandler.setReceiver(macAddr);
+                connectionHandler.setReceiver(ipAddr);
                 os = 'W';
+                connectionHandler.sendTak("W");
+                //connectionHandler.os = 'W';
             } else if (input.matches("/connect (\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}) Linux")) {
-                macAddr = input.substring(8, input.lastIndexOf(" "));
-                this.status = "Connecting to Linux Clinet\n" +
-                        "Mac Address:\t" + macAddr;
+                ipAddr = input.substring(8, input.lastIndexOf(" "));
+                this.status = "Connected to Linux Clinet\n" +
+                        "IP Address:\t" + ipAddr;
                 System.out.println(this.status);
-                connectionHandler.setReceiver(macAddr);
+                connectionHandler.setReceiver(ipAddr);
+                connectionHandler.sendTak("L");
                 os = 'L';
+                //connectionHandler.os = 'L';
             } else if (os == 'W') {
                 if (input.matches("/dir ([a-zA-Z]:)?(\\\\[a-zA-Z0-9_.-]+)+\\\\?")) {
                     connectionHandler.sendTak(input.substring(1, input.length()));
                 } else if (input.matches("/disconnect")) {
                     os = ' ';
                     this.status = "Not Connected - Use /connect to Connect";
-                    macAddr = "";
+                    ipAddr = "";
+                } else if (input.equals("")) {
                 } else {
                     System.out.println("Invalid Command");
                     showWinCommands();
@@ -138,11 +143,24 @@ public class CLIApplication {
                 } else if (input.matches("/disconnect")) {
                     os = ' ';
                     this.status = "Not Connected - Use /connect to Connect";
-                    macAddr = "";
+                    ipAddr = "";
+                } else if (input.matches("/ifconfig")) {
+                    connectionHandler.sendTak(input.substring(1, input.length()));
+                } else if (input.matches("/rmdir (/[^/ ]*)+/?$")) {
+                    connectionHandler.sendTak(input.substring(1, input.length()));
+                } else if (input.matches("/mkdir (/[^/ ]*)+/?$")) {
+                    connectionHandler.sendTak(input.substring(1, input.length()));
+                } else if (input.matches("/rm (/[^/ ]*)+/?$")) {
+                    connectionHandler.sendTak(input.substring(1, input.length()));
+                } else if (input.matches("/cd (/[^/ ]*)+/?$")) {
+                    connectionHandler.sendTak(input.substring(1,input.length()));
+                } else if (input.equals("")){
+
                 } else {
                     System.out.println("Invalid Command");
-                    showWinCommands();
+                    showLinCommands();
                 }
+            } else if (input.equals("")) {
             } else {
                 System.out.println("Invalid Command");
                 showCommands();
@@ -158,6 +176,18 @@ public class CLIApplication {
         System.out.print(output);
     }
 
+    private void showLinCommands() {
+        String output = printLineBreak('-') +
+                "Linux Commands:\n" +
+                "\t/ls <dir>\n" +
+                "\t/rm <file>\n" +
+                "\t/mkdir <dir name>\n" +
+                "\t/rmdir <dirname>\n" +
+                "\t/ifconfig\n" +
+                printLineBreak('-');
+        System.out.print(output);
+    }
+
     /**
      * This Method shows all available Coammands
      */
@@ -166,9 +196,9 @@ public class CLIApplication {
                 "Available Commands:\n" +
                 "General Commands:\n" +
                 "\t/help - Show help Message\n" +
-                "\t/connect <Mac-Address> <OS-System> - Establish connection with User\n" +
+                "\t/connect <IP-Address> <OS-System> - Establish connection with User\n" +
                 "\t/status - Show actual Status" +
-                "\n\tCommands when connected to another User\n" +
+                "\n\nCommands when connected to another User\n" +
                 "\tLinux Commands:\n" +
                 "\t\t/ls <dir> - List all Items in specified Directory\n" +
                 "\tWindows Commands:\n" +
