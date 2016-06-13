@@ -7,7 +7,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 /**
- * Created by pkogler on 12.06.2016.
+ * @author pkogler
+ * @version 1.0
+ * @date 12.06.2016
+ *
+ * This Class acts as the Connection handler
  */
 public class ConnectionHandler implements MessageListener {
     //Used to attach the sender to the email
@@ -33,8 +37,16 @@ public class ConnectionHandler implements MessageListener {
      */
     private String receiver = "";
 
+    /*
+     * The OS
+     */
     public char os;
 
+    /**
+     * Constructor of Connection handler
+     *
+     * @param url The Url to with Broker the Client should Connects
+     */
     public ConnectionHandler(String url) {
         System.out.println("\nComputer / User name:\t"+compName);
         ConnectionFactory factory = new ActiveMQConnectionFactory(compName, ActiveMQConnectionFactory.DEFAULT_PASSWORD,
@@ -76,46 +88,18 @@ public class ConnectionHandler implements MessageListener {
         }
     }
 
-    public Connection getConnection() {
-        return connection;
-    }
-
-    public void setConnection(Connection connection) {
-        this.connection = connection;
-    }
-
-    public Session getSession() {
-        return session;
-    }
-
-    public void setSession(Session session) {
-        this.session = session;
-    }
-
-    public MessageConsumer getConsumer() {
-        return consumer;
-    }
-
-    public void setConsumer(MessageConsumer consumer) {
-        this.consumer = consumer;
-    }
-
-    public String getCompName() {
-        return compName;
-    }
-
-    public void setCompName(String compName) {
-        this.compName = compName;
-    }
-
-    public String getReceiver() {
-        return receiver;
-    }
-
+    /**
+     * Setting the Receiver
+     * @param receiver
+     */
     public void setReceiver(String receiver) {
         this.receiver = receiver;
     }
 
+    /**
+     * On Message when a Message leaves the Queue
+     * @param message
+     */
     @Override
     public void onMessage(Message message) {
         TextMessage textMessage = (TextMessage) message;

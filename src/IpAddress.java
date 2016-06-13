@@ -6,7 +6,15 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
-
+/**
+ * @author pkogler
+ * @version 1.0
+ * @date 12.06.2016
+ *
+ * This Class acts as the Main - Class
+ * This Class contains the Main Method and invokes
+ * the CLIApplication
+ */
 public class IpAddress {
 
    public static String getMacAddress() {
