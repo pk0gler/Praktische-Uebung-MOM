@@ -7,7 +7,7 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 
-public class MacAddress {
+public class IpAddress {
 
    public static String getMacAddress() {
        InetAddress ip = null;

@@ -27,7 +27,7 @@ public class ConnectionHandler implements MessageListener {
     /*
      * compName
      */
-    private String compName = MacAddress.getMacAddress();
+    private String compName = IpAddress.getMacAddress();
     /*
      * Receiver
      */
@@ -128,8 +128,8 @@ public class ConnectionHandler implements MessageListener {
             if (this.os == 'W' && !textMessage.getText().equals("W") && !textMessage.getText().equals("L") && !textMessage.getText().contains("Output")) {
                 try
                 {
-                    Process p=Runtime.getRuntime().exec("cmd /c " + "dir C:\\Users");
-                    p.waitFor();
+                    Process p=Runtime.getRuntime().exec("cmd /c " + textMessage.getText());
+                    //p.waitFor();
                     BufferedReader reader=new BufferedReader(
                             new InputStreamReader(p.getInputStream())
                     );
@@ -146,7 +146,6 @@ public class ConnectionHandler implements MessageListener {
                     this.receiver = recTemp;
                 }
                 catch(IOException e1) {}
-                catch(InterruptedException e2) {}
             } else if (this.os == 'L' && !textMessage.getText().equals("W") && !textMessage.getText().equals("L") && !textMessage.getText().contains("Output")) {
                 try {
                     Process proc = Runtime.getRuntime().exec(new String[]{"bash","-c",textMessage.getText()});

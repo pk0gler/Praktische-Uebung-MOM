@@ -78,89 +78,298 @@ public class CLIApplication {
                     "\n\t<localhost>");
         }
 
-        //Argumnets Correct !
+        // Argumnets Correct !
         System.out.println("All Arguments were Correct :)\n" +
                 "Now the connection to the Message Broker will be established ...");
 
+        /*
+         * Creating URL
+         */
         String url = "tcp://" + args[0];
 
+        /*
+         * Creating the Connection handler
+         */
         ConnectionHandler connectionHandler = new ConnectionHandler(url);
 
-        boolean inCommunication = false;
+        /*
+         * Variables to determin whether Windows or Linux is used
+         * for Communication and specific IP - Address
+         */
         char os = ' ';
         String ipAddr = "";
+        boolean freeMode = false;
 
+        /*
+         * Initializing the Scanner
+         */
         Scanner scanner = new Scanner(System.in);
         String input;
 
+        // Show help
         showHelp();
 
+        // Show all Available Commands
         showCommands();
 
+        // Which Status the Programm is in
         this.status = "Not Connected - Use /connect to Connect";
 
         while (true) {
+            /*
+             * Showing an Terminal like Sign
+             */
             System.out.print(">");
+            /*
+             * Reading nextLine from Scanner
+             */
             input = scanner.nextLine();
+            // Trim Input
             input = input.trim();
+
+                /*
+                 * When User types /help
+                 * The Help Text will be showed
+                 */
             if (input.matches("/help")) {
                 showCommands();
+
+
+                /*
+                 * When User types /status
+                 * The Status will be showed
+                 */
             } else if (input.matches("/status")) {
                 System.out.println(this.status);
+
+
+                /*
+                 * When User types /connect ... Windows
+                 * A connection to the specified Host will be established
+                 */
             } else if (input.matches("/connect (\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}) Windows")) {
+                // Getting Ip - Address from Command
                 ipAddr = input.substring(8, input.lastIndexOf(" "));
+                // Setting Status
                 this.status = "Connecting to Windows Clinet\n" +
                         "IP Address:\t" + ipAddr;
+                // Showing current Status
                 System.out.println(this.status);
+                /*
+                  * Set the receiver so every
+                  * Output is going to specified Host
+                  */
                 connectionHandler.setReceiver(ipAddr);
+                // Setting Os system to Windows
                 os = 'W';
+                // Send Task so its clear that Windows will be Used
                 connectionHandler.sendTak("W");
-                //connectionHandler.os = 'W';
+
+
+                /*
+                 * When the User types /connect ... Linux
+                 * A connection to the specified Host will be established
+                 */
             } else if (input.matches("/connect (\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}) Linux")) {
+                // Setting IP-Address
                 ipAddr = input.substring(8, input.lastIndexOf(" "));
+                // Setting and showing Statuss
                 this.status = "Connected to Linux Clinet\n" +
                         "IP Address:\t" + ipAddr;
                 System.out.println(this.status);
+
+                // Setting Receiver
                 connectionHandler.setReceiver(ipAddr);
+                // Setting Os and sending it to Receiver
                 connectionHandler.sendTak("L");
                 os = 'L';
-                //connectionHandler.os = 'L';
+
+
+                /*
+                 * Avalable or valid Commands for Windows
+                 */
             } else if (os == 'W') {
+
+
+                    /*
+                     * When using /dir ...
+                     * Task will be send to specified Receiver
+                     */
                 if (input.matches("/dir ([a-zA-Z]:)?(\\\\[a-zA-Z0-9_.-]+)+\\\\?")) {
+                    // sending the task
                     connectionHandler.sendTak(input.substring(1, input.length()));
+
+
+                    /*
+                     * When using the Command /disconnect
+                     * Disconnecting from Current Host
+                     */
                 } else if (input.matches("/disconnect")) {
+                    // Reseting the os Variable
                     os = ' ';
+                    // Clearing Status
                     this.status = "Not Connected - Use /connect to Connect";
-                    ipAddr = "";
+
+
+                    /*
+                     * When using the Command /ipconfig
+                     * Network interfaces will be showed
+                     */
+                } else if (input.matches("/ipconfig")) {
+                    // sending task to receiver
+                    connectionHandler.sendTak(input.substring(1, input.length()));
+
+
+                    /*
+                     * When Command /move is used
+                     * Moving Directories or Files
+                     */
+                } else if (input.matches("/move ([a-zA-Z]:)?(\\\\[a-zA-Z0-9_.-]+)+\\\\? ([a-zA-Z]:)?(\\\\[a-zA-Z0-9_.-]+)+\\\\?")) {
+                    // Sending Task
+                    connectionHandler.sendTak(input.substring(1, input.length()));
+
+
+                    /*
+                     * Avoiding Errors when typing Nothing
+                     */
                 } else if (input.equals("")) {
+
+
+                    /*
+                     * When attempting to use the /free Command
+                     */
+                } else if (input.matches("/free")) {
+                    /*
+                     * ENabling / Disabling /free Mode
+                     * Toggling
+                     */
+                    if (freeMode) {
+                        freeMode = false;
+                    } else {
+                        freeMode = true;
+                    }
                 } else {
-                    System.out.println("Invalid Command");
-                    showWinCommands();
+
+
+                    /*
+                     * When Free Mode Active every Command could be
+                     * executed
+                     */
+                    if (freeMode) {
+                        // sending every Input as Task
+                        connectionHandler.sendTak(input);
+                    } else {
+
+
+                        /*
+                         * When no Matched Found
+                         * Invalid Command will be displayed
+                         */
+                        System.out.println("Invalid Command");
+                        showWinCommands();
+                    }
                 }
+
+
+                /*
+                 * When Linux was Specified as OS
+                 */
             } else if (os == 'L') {
+
+
+                /*
+                 * When Using the /ls Command
+                 */
                 if (input.matches("/ls (/[^/ ]*)+/?$")) {
+                    // Sending Command as task
                     connectionHandler.sendTak(input.substring(1, input.length()));
+
+                    /*
+                     * When /disconnect is used
+                     */
                 } else if (input.matches("/disconnect")) {
                     os = ' ';
                     this.status = "Not Connected - Use /connect to Connect";
-                    ipAddr = "";
+
+
+                    /*
+                     * When ifconfig is used
+                     */
                 } else if (input.matches("/ifconfig")) {
                     connectionHandler.sendTak(input.substring(1, input.length()));
+
+
+                    /*
+                     * When /rmdir is used
+                     */
                 } else if (input.matches("/rmdir (/[^/ ]*)+/?$")) {
                     connectionHandler.sendTak(input.substring(1, input.length()));
+
+
+                    /*
+                     * When mkdir is used
+                     */
                 } else if (input.matches("/mkdir (/[^/ ]*)+/?$")) {
                     connectionHandler.sendTak(input.substring(1, input.length()));
+
+
+                    /*
+                     * When /rm is used
+                     */
                 } else if (input.matches("/rm (/[^/ ]*)+/?$")) {
                     connectionHandler.sendTak(input.substring(1, input.length()));
-                } else if (input.matches("/cd (/[^/ ]*)+/?$")) {
-                    connectionHandler.sendTak(input.substring(1,input.length()));
-                } else if (input.equals("")){
 
+
+                    /*
+                     * When /cd is used
+                     */
+                } else if (input.matches("/cd (/[^/ ]*)+/?$")) {
+                    connectionHandler.sendTak(input.substring(1, input.length()));
+
+
+                    /*
+                     * Avoidiung errors when nothing but a \n (retunr)
+                     * was entered
+                     */
+                } else if (input.equals("")) {
+
+
+                     /*
+                     * ENabling / Disabling /free Mode
+                     * Toggling
+                     */
+                } else if (input.matches("/free")) {
+                    if (freeMode) {
+                        freeMode = false;
+                    } else {
+                        freeMode = true;
+                    }
+
+
+                     /*
+                     * When Free Mode Active every Command could be
+                     * executed
+                     */
                 } else {
-                    System.out.println("Invalid Command");
-                    showLinCommands();
+                    if (freeMode) {
+                        connectionHandler.sendTak(input);
+
+
+                        /*
+                        * When Free Mode Active every Command could be
+                        * executed
+                        */
+                    } else {
+                        System.out.println("Invalid Command");
+                        showLinCommands();
+                    }
                 }
             } else if (input.equals("")) {
+
+
+                /*
+                 * When no Match was found
+                 */
             } else {
                 System.out.println("Invalid Command");
                 showCommands();
@@ -168,6 +377,9 @@ public class CLIApplication {
         }
     }
 
+    /**
+     * This Method shows all WindowsCommands
+     */
     private void showWinCommands() {
         String output = printLineBreak('-') +
                 "Windows Commands:\n" +
@@ -176,6 +388,9 @@ public class CLIApplication {
         System.out.print(output);
     }
 
+    /**
+     * This Method shows all Linux Commands
+     */
     private void showLinCommands() {
         String output = printLineBreak('-') +
                 "Linux Commands:\n" +
@@ -194,6 +409,7 @@ public class CLIApplication {
     private void showCommands() {
         String output = printLineBreak('-') +
                 "Available Commands:\n" +
+                printLineBreak('-') +
                 "General Commands:\n" +
                 "\t/help - Show help Message\n" +
                 "\t/connect <IP-Address> <OS-System> - Establish connection with User\n" +
@@ -201,8 +417,14 @@ public class CLIApplication {
                 "\n\nCommands when connected to another User\n" +
                 "\tLinux Commands:\n" +
                 "\t\t/ls <dir> - List all Items in specified Directory\n" +
+                "\t\t/rm <file>\n" +
+                "\t\t/mkdir <dir name>\n" +
+                "\t\t/rmdir <dirname>\n" +
+                "\t\t/ifconfig\n" +
                 "\tWindows Commands:\n" +
-                "\t\t/dir <dir>\n" +
+                "\t\t/dir <dir>\n\n" +
+                "\tEnabling free Mode (Emulating ssh - Connection)\n" +
+                "\t\t/free\n" +
                 printLineBreak('-');
         System.out.print(output);
     }
