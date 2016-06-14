@@ -433,7 +433,7 @@ public class CLIApplication {
     }
 
     /**
-     * Show HelpMessage
+     * Show HelpMessage TO User
      */
     private void showHelp() {
         String output = printLineBreak('#') +
