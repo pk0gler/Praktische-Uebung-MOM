@@ -366,6 +366,9 @@ public class CLIApplication {
                 }
             } else if (input.equals("")) {
 
+            } else if (input.equals("/exit")) {
+                System.exit(0);
+
 
                 /*
                  * When no Match was found
@@ -375,7 +378,7 @@ public class CLIApplication {
                 showCommands();
             }
         }
-    }
+    } 
 
     /**
      * This Method shows all WindowsCommands
